@@ -4,17 +4,17 @@ from bs4 import BeautifulSoup
 from nltk import PorterStemmer
 
 path = 'C:\\Users\\pakistan\\Desktop\\IR\\corpus\\corpus\\corpus'
-files = []
+doc_files = open('docids.txt', 'a')
 stop = []
 tok = []
-token = []
 
 #r = root, d = directory, f = files
 for r, d, f in os.walk(path):
     for file in f:
-        files = os.path.join(r, file)
-        #print(files)
-        with open(files) as query:
+        file_name = os.path.join(r, file)
+        #name = os.path.basename(file_name)
+        #doc_files.write(name + "\n")
+        with open(file_name) as query:
             
             file = open('stoplist.txt', 'r')
             #print("reading file\n")
@@ -52,7 +52,7 @@ for r, d, f in os.walk(path):
                 for token in tokens:
                     temp.append(str(token).lower())
                 
-                print(temp)
+                #print(temp)
                 
                 for s in stop:
                     if s in temp:
@@ -60,6 +60,8 @@ for r, d, f in os.walk(path):
                 
                 for t in temp:
                     tok.append(str(PorterStemmer().stem(t)))
-                    print(tok)
+                #print(tok)
+         
             except:
                    pass
+doc_files.close()               

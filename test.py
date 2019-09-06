@@ -10,13 +10,15 @@ from gensim.corpora import Dictionary
 path = r'C:\\Users\\pakistan\\Desktop\\IR\\Assignment-1\\corpus\\corpus\\corpus'
 subpath = r'C:\\Users\\pakistan\\Desktop\\IR\\Assignment-1'
 index = 0
+count = 0
+doc_count = 0
 
 #r = root, d = directory, f = files
 def process_files(filenames):
     file_to_terms = {}
     for file in filenames:
         stopwords = open('stoplist.txt', 'r')
-        #ids = open('termids.txt', 'w', encoding="utf-8")
+        ids = open('termids.txt', 'w', encoding="utf-8")
         sp = stopwords.readlines()
         pattern = re.compile('[\W_]+')
         
@@ -30,22 +32,23 @@ def process_files(filenames):
             #get text
             text = soup.get_text()
                 
-            file_to_terms[file] = text.lower();
-            file_to_terms[file] = pattern.sub(' ',file_to_terms[file])
-            re.sub(r'[\W_]+','', file_to_terms[file])
+            file_to_terms[filenames] = text.lower();
+            file_to_terms[filenames] = pattern.sub(' ',file_to_terms[filenames])
+            re.sub(r'[\W_]+','', file_to_terms[filenames])
             #file_to_terms[file] = file_to_terms[file].split()
-            file_to_terms[file] = word_tokenize(file_to_terms[file])
+            file_to_terms[filenames] = word_tokenize(file_to_terms[filenames])
                        
-            file_to_terms[file] = [w for w in file_to_terms[file] if w not in sp]
+            file_to_terms[filenames] = [w for w in file_to_terms[filenames] if w not in sp]
             
             print("stemming...\n")                
-            file_to_terms[file] = [PorterStemmer().stem(w) for w in file_to_terms[file]]
+            file_to_terms[filenames] = [PorterStemmer().stem(w) for w in file_to_terms[filenames]]
             
             print("File pre processed.... returning:\n")
-            print(file_to_terms[file]) 
+            #print(file_to_terms) 
+            
             '''
             print("copying to file")
-            temp = [data.split() for data in file_to_terms[file]]    
+            temp = [data.split() for data in file_to_terms[filenames]]    
             dct = Dictionary(temp)  # initialize a Dictionary
             for k, v in dct.token2id.items():
                 ids.write(str(v) + '\t')
@@ -53,7 +56,7 @@ def process_files(filenames):
                 ids.write('\n')
                 
             ids.close()
-            '''                                
+            '''                               
             return file_to_terms
 
 #input = [word1, word2, ...]
@@ -63,8 +66,10 @@ def index_one_file(termlist):
     for index, word in enumerate(termlist):
         if word in fileIndex.keys():
             fileIndex[word].append(index)
+            #count +=1 
         else:
             fileIndex[word] = [index]
+            #count += 1
     return fileIndex
 
 #input = {filename: [word1, word2, ...], ...}
@@ -72,8 +77,9 @@ def index_one_file(termlist):
 def make_indices(termlists):
     total = {}
     for filename in termlists.keys():
+        c = doc_count(termlists)
         total[filename] = index_one_file(termlists[filename])
-    return total
+    return total, c
 
 def fullIndex(regdex):
     total_index = {}
@@ -88,6 +94,16 @@ def fullIndex(regdex):
                total_index[word] = {filename: regdex[filename][word]}
     return total_index
 
+
+from collections import defaultdict
+def doc_count(my_list):
+    res = defaultdict(set)
+    for k, v in my_list.items():
+        for i in v:
+            res[i].add(k)
+    return dict(zip(res.keys(), map(lambda x:len(x), res.values())))
+
+
 temp = []
 #r = root, d = directory, f = files
 for r, d, f in os.walk(path):
@@ -98,18 +114,19 @@ for r, d, f in os.walk(path):
         temp.append(name)
         file_to_term = process_files(file_name)
         index += 1
-        #print(index)
+        print(index)
         
-        print("File to Term func output:\n")
-        print(file_to_term)
-        total = make_indices(file_to_term)
+        #print("File to Term func output:\n")
+        #print(file_to_term)
+        
+        total, counter = make_indices(file_to_term)
         
         print("Make indices Output: \n")
-        print(total)
+        print(counter)
         
-        print("Final index: \n")
-        finalIndex = fullIndex(total)
-        print(finalIndex)
+        #print("Final index: \n")
+        #finalIndex = fullIndex(total)
+        #print(finalIndex)
 
 '''
 temp1 = [t.split() for t in temp]
