@@ -8,16 +8,9 @@ import codecs
 from gensim.corpora import Dictionary
 import sys
 
-path = r'C:\\Users\\pakistan\\Desktop\\IR\\Assignment-1\\corpus\\corpus\\corpus'
-subpath = r'C:\\Users\\pakistan\\Desktop\\IR\\Assignment-1'
-index = 0
-doc_id = 1
-term_id = 1
-terms = []
-docs = []
-doc_term_positions = []
-term_map = {}
-
+#path = r'C:\\Users\\pakistan\\Desktop\\IR\\Assignment-1\\IR-AS-1\\corpus1\\corpus\\corpus'
+#subpath = r'C:\\Users\\pakistan\\Desktop\\IR\\Assignment-1'
+#term_file = open('termids.txt', 'w')
 def remove_headers(file_name):
     with codecs.open(file_name, encoding="utf-8", errors = 'ignore') as f: 
         data = f.read().splitlines()
@@ -39,17 +32,24 @@ def remove_headers(file_name):
     return file_data
 
 #r = root, d = directory, f = files
-def process_files(filenames):
-    file_to_terms = {}
-    for file in filenames:
-        print(file + '\n')
+def process_files(path):
+    file_names = os.listdir(path)
+    doc_id = 1
+    term_id = 1
+    terms = []
+    docs = []
+    doc_term_positions = []
+    term_map = {}
+    
+    for file in file_names:
+        print(file + ' ' + str(doc_id))
         stopwords = open('stoplist.txt', 'r')
-        ids = open('termids.txt', 'w', encoding="utf-8")
+        #ids = open('termids.txt', 'w', encoding="utf-8")
         sp = stopwords.readlines()
         pattern = re.compile('[\W_]+')
             
         #remove header
-        data = remove_headers(filenames)
+        data = remove_headers(path + '\\' + file)
         
         soup = BeautifulSoup(data, "lxml")
 
@@ -60,46 +60,71 @@ def process_files(filenames):
         #get text
         text = soup.get_text()
             
-        file_to_terms[filenames] = text.lower();
-        file_to_terms[filenames] = pattern.sub(' ',file_to_terms[filenames])
-        re.sub(r'[\W_]+','', file_to_terms[filenames])
+        text1 = text.lower();
+        text2 = pattern.sub(' ',text1)
+        re.sub(r'[\W_]+','', text2)
         
-        file_to_terms[filenames] = word_tokenize(file_to_terms[filenames])
+        tokens = word_tokenize(text2)
                     
-        print("stemming...\n")           
-        file_to_terms[filenames] = [w for w in file_to_terms[filenames] if w not in sp]
-                        
-        file_to_terms[filenames] = [PorterStemmer().stem(w) for w in file_to_terms[filenames]]
+        print("stop wording...\n")           
+        stop = [w for w in tokens if w not in sp]
+        stopwords.close()
         
-        print("File pre processed.... returning:\n")
-         
-        '''
-        print("copying to file")
-        temp = [data.split() for data in file_to_terms[filenames]]    
-        dct = Dictionary(temp)  # initialize a Dictionary
-        for k, v in dct.token2id.items():
-            ids.write(str(v) + '\t')
-            ids.write(k)
-            ids.write('\n')
-            
-        ids.close()
-        '''
-        
+        print("stemming...\n")                
+        stemm = [PorterStemmer().stem(s) for s in stop]
+          
         pos = 1
-        for token in file_to_terms[filenames]:
-            if term_map.has_key(token) == False:
+        for token in stemm:
+            if  token not in term_map:
                 term_map[token] = term_id
                 terms.append(str(term_id) + '\t' + token) #it will be write to the file
                 term_id += 1
             doc_term_positions.append((doc_id, term_map[token], pos))
             pos += 1
-
+        print("i am here....1\n") 
         #get file name from path and this info  will be written to the .txt file
-        name = os.path.basename(filenames)
-        docs.append((str(doc_id) + '\t' + name))
+        #name = os.path.basename(filenames)
+        docs.append((str(doc_id) + '\t' + file))
         doc_id += 1
-                                       
-        return file_to_terms
+    
+    print("i am here....2\n")
+    posting = {}
+    for p in doc_term_positions:
+        if posting.__contains__((p[0], p[1])) == False:
+            posting[(p[0], p[1])] = [p[2]]
+        else:
+            posting[(p[0], p[1])].append(p[2])
+                   
+    #term_file.write(terms)
+    #np.savetxt('termids.txt', terms, encoding="utf-8", fmt='%s')
+    '''
+    Forward index containing position of each term in each file
+    with open('pos_of_each_term_in_each_file.txt', mode='w', encoding="utf-8", errors='ignore') as pos_in_file:
+        for key in posting:
+            pos_in_file.write(str(key[0]) + '\t' + str(key[1]))
+            for value in posting[key]:
+                pos_in_file.write('\t' + str(value))
+            pos_in_file.write('\n')
+    pos_in_file.close()
+    '''
+    print("File pre processed.... returning:\n")
+    #term_file.close()                               
+    return
+
+def get_positions(data):
+    t = {}
+    for d in data:
+        c = d.split('\t')
+        t[c[0], c[1]] = c[2:]
+    
+    return t
+
+def indexer():
+    f = open('pos_of_each_term_in_each_file.txt')
+    data = f.readlines()
+
+    #collect positions of words saved in the file
+    t = get_positions(data)
 
 #input = [word1, word2, ...]
 #output = {word1: [pos1, pos2], word2: [pos2, pos434], ...}
@@ -135,39 +160,40 @@ def fullIndex(regdex):
                total_index[word] = {filename: regdex[filename][word]}
     return total_index
 
-'''
-from collections import defaultdict
-def doc_count(my_list):
-    revDict = {v : sum(1 for l in my_list.values() if v in l)  
-        for v in set(x for y in my_list.values() for x in y) }
-    return revDict
-'''
+if __name__=="__main__":
+    if len(sys.argv) != 2:
+        print("usage: python tokenize <directory_name>")
+        
+    else:
+        print(sys.argv[1])
+        process_files(sys.argv[1])
 
-#temp = []
+'''
+temp = []
+index = 0
 #r = root, d = directory, f = files
 for r, d, f in os.walk(path):
     for file in f:
         file_name = os.path.join(r, file)
-        
-        #print(name)
+        name = os.path.basename(file_name)
+        print(name)
         #temp.append(name)
+        print(index)
         file_to_term = process_files(file_name)
         index += 1
-        print(index)
-        
-        #print("File to Term func output:\n")
-        #print(file_to_term)
-        
-        #total = make_indices(file_to_term)
-        
-        #print("Make indices Output: \n")
-        #print(counter, total)
-        
-        #print("Final index: \n")
-        #finalIndex = fullIndex(total)
-        #print(finalIndex)
 
-'''
+#print("File to Term func output:\n")
+#print(file_to_term)
+
+#total = make_indices(file_to_term)
+
+#print("Make indices Output: \n")
+#print(counter, total)
+
+#print("Final index: \n")
+#finalIndex = fullIndex(total)
+#print(finalIndex)
+
 temp1 = [t.split() for t in temp]
 docs = open('docids.txt', 'w')
 name_to_int = Dictionary(temp1) 
@@ -177,4 +203,19 @@ for k, v in name_to_int.token2id.items():
         docs.write('\n')
        
 docs.close()
-'''        
+
+print("copying to file")
+temp = [data.split() for data in file_to_terms[filenames]]    
+dct = Dictionary(temp)  # initialize a Dictionary
+for k, v in dct.token2id.items():
+    ids.write(str(v) + '\t')
+    ids.write(k)
+    ids.write('\n')
+ids.close()
+
+from collections import defaultdict
+def doc_count(my_list):
+    revDict = {v : sum(1 for l in my_list.values() if v in l)  
+        for v in set(x for y in my_list.values() for x in y) }
+    return revDict
+'''
