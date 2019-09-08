@@ -8,7 +8,9 @@ import codecs
 from gensim.corpora import Dictionary
 import sys
 
-#path = r'C:\\Users\\pakistan\\Desktop\\IR\\Assignment-1\\IR-AS-1\\corpus1\\corpus\\corpus'
+#path = r'F:\IR\IR-AS-1\corpus1\corpus\corpus'
+
+mapping = {} #this will have {filename: [word,...],...}
 
 #term_file = open('termids.txt', 'w')
 def remove_headers(file_name):
@@ -39,7 +41,7 @@ def process_files(path):
     terms = []
     docs = []
     doc_term_positions = []
-    term_map = {}
+    term_map = {} #map tokens/words to integer
     
     for file in file_names:
         print(file + ' ' + str(doc_id))
@@ -72,7 +74,9 @@ def process_files(path):
         
         print("stemming...\n")                
         stemm = [PorterStemmer().stem(s) for s in stop]
-          
+        
+        mapping[file] = (stemm)
+        #print(mapping)  
         pos = 1
         for token in stemm:
             if  token not in term_map:
@@ -110,26 +114,11 @@ def process_files(path):
     '''
     print("File pre processed.... returning:\n")
     #term_file.close()                               
-    return
-
-def get_positions(data):
-    t = {}
-    for d in data:
-        c = d.split('\t')
-        t[c[0], c[1]] = c[2:]
-    
-    return t
-
-def indexer():
-    f = open('pos_of_each_term_in_each_file.txt')
-    data = f.readlines()
-
-    #collect positions of words saved in the file
-    t = get_positions(data)
+    return mapping
 
 #input = [word1, word2, ...]
 #output = {word1: [pos1, pos2], word2: [pos2, pos434], ...}
-def index_one_file(termlist):
+def make_word-pos_dict(termlist):
     fileIndex = {}
     for index, word in enumerate(termlist):
         if word in fileIndex.keys():
@@ -142,13 +131,15 @@ def index_one_file(termlist):
 
 #input = {filename: [word1, word2, ...], ...}
 #res = {filename: {word: [pos1, pos2, ...]}, ...}
-def make_indices(termlists):
+def make_hashmap_of_hashmap(termlists):
     total = {}
     for filename in termlists.keys():
-        total[filename] = index_one_file(termlists[filename])
+        total[filename] = make_word-pos_dict(termlists[filename])
     return total
 
-def fullIndex(regdex):
+#input = {filename: {word: [pos1, pos2, ...], ... }}
+#res = {word: {filename: [pos1, pos2]}, ...}, ...}
+def final_indexing(regdex):
     total_index = {}
     for filename in regdex.keys():
         for word in regdex[filename].keys():
@@ -167,4 +158,6 @@ if __name__=="__main__":
         
     else:
         print(sys.argv[1])
-        process_files(sys.argv[1])
+        res = process_files(sys.argv[1])
+        
+        
