@@ -10,7 +10,7 @@ import sys
 
 #path = r'F:\IR\IR-AS-1\corpus1\corpus\corpus'
 
-mapping = {} #this will have {filename: [word,...],...}
+mapping = {} #this will have {fname: [word,...],...}
 posting = {}
 
 #term_file = open('termids.txt', 'w')
@@ -77,7 +77,7 @@ def process_files(path):
         stemm = [PorterStemmer().stem(s) for s in stop]
         
         mapping[file] = (stemm)
-        #print(mapping)  
+          
         pos = 1
         for token in stemm:
             if  token not in term_map:
@@ -88,11 +88,9 @@ def process_files(path):
             pos += 1
          
         #get file name from path and this info  will be written to the .txt file
-        #name = os.path.basename(filenames)
         docs.append((str(doc_id) + '\t' + file))
         doc_id += 1
 
-    
     for p in doc_term_positions:
         if posting.__contains__((p[0], p[1])) == False:
             posting[(p[0], p[1])] = [p[2]]
@@ -119,43 +117,45 @@ def process_files(path):
 
 #input = [word1, word2, ...]
 #output = {word1: [pos1, pos2], word2: [pos2, pos434], ...}
-def make_word_pos_dict(termlist):
-    fileIndex = {}
-    for index, word in enumerate(termlist):
-        if word in fileIndex.keys():
-            fileIndex[word].append(index)
+def make_word_pos_dict(parameter):
+    word_positions = {}
+    for index, word in enumerate(parameter):
+        if word in word_positions.keys():
+            word_positions[word].append(index)
            
         else:
-            fileIndex[word] = [index]
+            word_positions[word] = [index]
            
-    return fileIndex
+    return word_positions
 
-#input = {filename: [word1, word2, ...], ...}
-#res = {filename: {word: [pos1, pos2, ...]}, ...}
-def make_hashmap_of_hashmap(termlists):
-    total = {}
-    for filename in termlists.keys():
-        total[filename] = make_word_pos_dict(termlists[filename])
-    return total
+#input = {fname: [word1, word2, ...], ...}
+#res = {fname: {word: [pos1, pos2, ...]}, ...}
+def make_hashmap_of_hashmap(parameter):
+    file_word_pos_dict = {}
+    for fname in parameter.keys():
+        file_word_pos_dict[fname] = make_word_pos_dict(parameter[fname])
+    return file_word_pos_dict
 
-#input = {filename: {word: [pos1, pos2, ...], ... }}
-#res = {word: {filename: [pos1, pos2]}, ...}, ...}
-def final_indexing(regdex):
-    total_index = {}
-    for filename in regdex.keys():
-        for word in regdex[filename].keys():
-            if word in total_index.keys():
-                if filename in total_index[word].keys():
-                   total_index[word][filename].extend(regdex[filename][word][:])
+#input = {fname: {word: [pos1, pos2, ...], ... }}
+#res = {word: {fname: [pos1, pos2]}, ...}, ...}
+def final_indexing(parameter):
+    final_index = {}
+    
+    for fname in parameter.keys():
+        for word in parameter[fname].keys():
+            if word in final_index.keys():
+                if fname in final_index[word].keys():
+                   final_index[word][fname].extend(parameter[fname][word][:])
+                
                 else:
-                   total_index[word][filename] = regdex[filename][word]
+                   final_index[word][fname] = parameter[fname][word]
             else:
-               total_index[word] = {filename: regdex[filename][word]}
-    return total_index
+                final_index[word] = {fname: parameter[fname][word]}
+    return final_index
 
 if __name__=="__main__":
     if len(sys.argv) != 2:
-        print("usage: python tokenize <directory_name>")
+        print("How to use? Write according to this:\n python file_name.py directory_name/path")
         
     else:
         print(sys.argv[1])
