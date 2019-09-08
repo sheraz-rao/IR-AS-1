@@ -12,6 +12,7 @@ import sys
 
 mapping = {} #this will have {fname: [word,...],...}
 posting = {}
+docs = []
 
 #term_file = open('termids.txt', 'w')
 def remove_headers(file_name):
@@ -40,7 +41,7 @@ def process_files(path):
     doc_id = 1
     term_id = 1
     terms = []
-    docs = []
+    
     doc_term_positions = []
     term_map = {} #map tokens/words to integer
     
@@ -99,7 +100,7 @@ def process_files(path):
                    
     #term_file.write(terms)
     #np.savetxt('temp_termids.txt', terms, encoding="utf-8", fmt='%s')
-    #np.savetxt('docids.txt', docs, encoding="utf-8", fmt='%s')
+    #np.savetxt('temp_docids.txt', docs, encoding="utf-8", fmt='%s')
     
     '''
     #Forward index containing position of each term in each file
@@ -113,7 +114,7 @@ def process_files(path):
     '''
     print("File pre processed.... returning:\n")
     #term_file.close()                               
-    return mapping
+    return mapping, term_map
 
 #input = [word1, word2, ...]
 #output = {word1: [pos1, pos2], word2: [pos2, pos434], ...}
@@ -159,9 +160,62 @@ if __name__=="__main__":
         
     else:
         print(sys.argv[1])
-        res = process_files(sys.argv[1])
+        res, term_map = process_files(sys.argv[1])
         hashmap = make_hashmap_of_hashmap(res)
         index = final_indexing(hashmap)
-        print(posting)
+        #print(index)
+        #print((index.keys()))
+        #print((index.values()))
+        #print(term_map)
         #sorted_keys = sorted(map(int, list(str(index))[0]))
         #print(sorted_keys)
+        #file = open('index.txt', 'w', encoding="utf-8")
+        #np.savetxt('index.txt', list(index), encoding="utf-8", fmt='%s')
+        #file.close()
+        #ind = 0
+        #f = open('temp_docids.txt', 'r')
+        #fmap = list(index.values())
+        #print(fmap, docs)
+        '''
+        for word in (index.keys()):
+            e = list(term_map.values())[ind]
+            file.write(str(e) + ' ' + str(fmap))
+            file.write('\n')
+            ind += 1
+        file.close()
+        '''
+        docs = []  #total docs in which a word appear
+        pos = []   #frequency of docs
+        for word in index.keys():
+            d = list(index[word].keys())
+            docs.append(d)
+
+            i = 0
+            for item in index.values():
+                last = list(index.values())[i]
+                #print(last)
+                last1 = list(last.keys())[-5:]
+                pos.append(last1)
+                i += 1
+            
+            print(pos)
+            sub_keys = sorted(map(int, (pos)))
+            
+            count = 0
+            z = 0
+            temp = []
+            
+            whole_dict = {}
+            for e in index:
+                e1 = list(e)[0]
+                whole_dict[e1] = e[e1]
+            
+            for sub_key in sub_keys:
+                sub_values = whole_dict[str(sub_key)]
+                
+                i = sorted(map(int, sub_values))
+                temp.append(i)
+                count = count + len(i)  #total positions in a file
+                #print(count)
+        #print(docs)
+            print(count)        

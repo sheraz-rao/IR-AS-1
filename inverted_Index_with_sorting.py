@@ -37,7 +37,7 @@ def indexer():
     
     for key in sorted_keys:
         sub_arr = term_index[str(key)]
-        
+        #print(sub_arr)
         t_id = sorted_keys[index] #tells us termID of word
         index += 1
         #out.write(str(t_id) + ' ')
