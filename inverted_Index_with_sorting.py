@@ -33,14 +33,14 @@ def indexer():
     
     #doc_id = 1
     
-    #out = open('temp_term_index.txt', 'w', encoding="utf-8")
+    out = open('index.txt', 'w', encoding="utf-8")
     
     for key in sorted_keys:
         sub_arr = term_index[str(key)]
         #print(sub_arr)
         t_id = sorted_keys[index] #tells us termID of word
         index += 1
-        #out.write(str(t_id) + ' ')
+        out.write(str(t_id) + ' ')
         ind = 0
         
         whole_dict = {}
@@ -87,13 +87,17 @@ def indexer():
             
             z+=1
             
-        #out.write(str(count) + ' ' + str(total_doc_count) + ' ')
-        #for i in range(0, total_doc_count):
-            #out.write(str(elements[i]) + ',' + str(temp[i]) + ' ')
-        #out.write('\n')
+        out.write(str(count) + ' ' + str(total_doc_count) + ' ')
+    
+        for i in range(0, total_doc_count):
+            out.write(str(elements[i]) + ',')
+            for j in range(len(temp[i])):
+                out.write(str(temp[i][j]) + ' ')
+        
+        out.write('\n')
         ind += 1
         #print("final index: \n", final_index, "\n")    
     
-    #out.close()
+    out.close()
                
 indexer()
