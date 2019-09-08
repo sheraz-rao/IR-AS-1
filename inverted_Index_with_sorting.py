@@ -95,6 +95,5 @@ def indexer():
         #print("final index: \n", final_index, "\n")    
     
     #out.close()
-       
-        
+               
 indexer()
