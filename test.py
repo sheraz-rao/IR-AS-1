@@ -11,6 +11,7 @@ import sys
 #path = r'F:\IR\IR-AS-1\corpus1\corpus\corpus'
 
 mapping = {} #this will have {filename: [word,...],...}
+posting = {}
 
 #term_file = open('termids.txt', 'w')
 def remove_headers(file_name):
@@ -91,7 +92,7 @@ def process_files(path):
         docs.append((str(doc_id) + '\t' + file))
         doc_id += 1
 
-    posting = {}
+    
     for p in doc_term_positions:
         if posting.__contains__((p[0], p[1])) == False:
             posting[(p[0], p[1])] = [p[2]]
@@ -118,7 +119,7 @@ def process_files(path):
 
 #input = [word1, word2, ...]
 #output = {word1: [pos1, pos2], word2: [pos2, pos434], ...}
-def make_word-pos_dict(termlist):
+def make_word_pos_dict(termlist):
     fileIndex = {}
     for index, word in enumerate(termlist):
         if word in fileIndex.keys():
@@ -134,7 +135,7 @@ def make_word-pos_dict(termlist):
 def make_hashmap_of_hashmap(termlists):
     total = {}
     for filename in termlists.keys():
-        total[filename] = make_word-pos_dict(termlists[filename])
+        total[filename] = make_word_pos_dict(termlists[filename])
     return total
 
 #input = {filename: {word: [pos1, pos2, ...], ... }}
@@ -159,5 +160,8 @@ if __name__=="__main__":
     else:
         print(sys.argv[1])
         res = process_files(sys.argv[1])
-        
-        
+        hashmap = make_hashmap_of_hashmap(res)
+        index = final_indexing(hashmap)
+        print(posting)
+        #sorted_keys = sorted(map(int, list(str(index))[0]))
+        #print(sorted_keys)

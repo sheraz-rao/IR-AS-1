@@ -26,8 +26,8 @@ def indexer():
         else:
             term_index[key[1]].append({key[0]:t[(key[0],key[1])]})
     
+    #print("\nterm index: \n", term_index ,"\n")
     sorted_keys = sorted(map(int, list(term_index.keys())))
-    #print("\nSorted keys: \n", sorted_keys ,"\n")
     
     final_index = OrderedDict()
     
