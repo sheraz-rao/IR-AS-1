@@ -9,7 +9,7 @@ from gensim.corpora import Dictionary
 import sys
 
 #path = r'C:\\Users\\pakistan\\Desktop\\IR\\Assignment-1\\IR-AS-1\\corpus1\\corpus\\corpus'
-#subpath = r'C:\\Users\\pakistan\\Desktop\\IR\\Assignment-1'
+
 #term_file = open('termids.txt', 'w')
 def remove_headers(file_name):
     with codecs.open(file_name, encoding="utf-8", errors = 'ignore') as f: 
@@ -55,7 +55,7 @@ def process_files(path):
 
         #kill all script and style elements
         for script in soup(["script", "style"]):
-            script.extract()    # rip it out
+            script.extract() 
     
         #get text
         text = soup.get_text()
@@ -81,13 +81,12 @@ def process_files(path):
                 term_id += 1
             doc_term_positions.append((doc_id, term_map[token], pos))
             pos += 1
-        print("i am here....1\n") 
+         
         #get file name from path and this info  will be written to the .txt file
         #name = os.path.basename(filenames)
         docs.append((str(doc_id) + '\t' + file))
         doc_id += 1
-    
-    print("i am here....2\n")
+
     posting = {}
     for p in doc_term_positions:
         if posting.__contains__((p[0], p[1])) == False:
