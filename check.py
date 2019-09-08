@@ -96,17 +96,17 @@ def process_files(path):
             posting[(p[0], p[1])].append(p[2])
                    
     #term_file.write(terms)
-    #np.savetxt('termids.txt', terms, encoding="utf-8", fmt='%s')
-    '''
-    Forward index containing position of each term in each file
-    with open('pos_of_each_term_in_each_file.txt', mode='w', encoding="utf-8", errors='ignore') as pos_in_file:
+    np.savetxt('temp_termids.txt', terms, encoding="utf-8", fmt='%s')
+    
+    #Forward index containing position of each term in each file
+    with open('temp_pos.txt', mode='w', encoding="utf-8", errors='ignore') as pos_in_file:
         for key in posting:
             pos_in_file.write(str(key[0]) + '\t' + str(key[1]))
             for value in posting[key]:
                 pos_in_file.write('\t' + str(value))
             pos_in_file.write('\n')
     pos_in_file.close()
-    '''
+    
     print("File pre processed.... returning:\n")
     #term_file.close()                               
     return
