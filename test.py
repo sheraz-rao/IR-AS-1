@@ -5,7 +5,6 @@ from bs4 import BeautifulSoup
 from nltk import PorterStemmer
 import re
 import codecs
-from gensim.corpora import Dictionary
 import sys
 
 #path = r'F:\IR\IR-AS-1\corpus1\corpus\corpus'
@@ -14,7 +13,6 @@ mapping = {} #this will have {fname: [word,...],...}
 posting = {}
 docs = []
 
-#term_file = open('termids.txt', 'w')
 def remove_headers(file_name):
     with codecs.open(file_name, encoding="utf-8", errors = 'ignore') as f: 
         data = f.read().splitlines()
@@ -35,7 +33,6 @@ def remove_headers(file_name):
     file_data = ' '.join(data)
     return file_data
 
-#r = root, d = directory, f = files
 def process_files(path):
     file_names = os.listdir(path)
     doc_id = 1
@@ -54,7 +51,6 @@ def process_files(path):
             
         #remove header
         data = remove_headers(path + '\\' + file)
-        
         soup = BeautifulSoup(data, "lxml")
 
         #kill all script and style elements
@@ -62,8 +58,7 @@ def process_files(path):
             script.extract() 
     
         #get text
-        text = soup.get_text()
-            
+        text = soup.get_text()     
         text1 = text.lower();
         text2 = pattern.sub(' ',text1)
         re.sub(r'[\W_]+','', text2)
@@ -77,7 +72,7 @@ def process_files(path):
         print("stemming...\n")                
         stemm = [PorterStemmer().stem(s) for s in stop]
         
-        mapping[file] = (stemm)
+        mapping[file] = stemm
           
         pos = 1
         for token in stemm:
@@ -102,16 +97,6 @@ def process_files(path):
     #np.savetxt('temp_termids.txt', terms, encoding="utf-8", fmt='%s')
     #np.savetxt('temp_docids.txt', docs, encoding="utf-8", fmt='%s')
     
-    '''
-    #Forward index containing position of each term in each file
-    with open('temp_pos.txt', mode='w', encoding="utf-8", errors='ignore') as pos_in_file:
-        for key in posting:
-            pos_in_file.write(str(key[0]) + '\t' + str(key[1]))
-            for value in posting[key]:
-                pos_in_file.write('\t' + str(value))
-            pos_in_file.write('\n')
-    pos_in_file.close()
-    '''
     print("File pre processed.... returning:\n")
     #term_file.close()                               
     return mapping, term_map
@@ -154,6 +139,8 @@ def final_indexing(parameter):
                 final_index[word] = {fname: parameter[fname][word]}
     return final_index
 
+import linecache
+
 if __name__=="__main__":
     if len(sys.argv) != 2:
         print("How to use? Write according to this:\n python file_name.py directory_name/path")
@@ -163,59 +150,17 @@ if __name__=="__main__":
         res, term_map = process_files(sys.argv[1])
         hashmap = make_hashmap_of_hashmap(res)
         index = final_indexing(hashmap)
-        #print(index)
-        #print((index.keys()))
-        #print((index.values()))
+    
         #print(term_map)
-        #sorted_keys = sorted(map(int, list(str(index))[0]))
-        #print(sorted_keys)
-        #file = open('index.txt', 'w', encoding="utf-8")
-        #np.savetxt('index.txt', list(index), encoding="utf-8", fmt='%s')
-        #file.close()
-        #ind = 0
-        #f = open('temp_docids.txt', 'r')
-        #fmap = list(index.values())
-        #print(fmap, docs)
-        '''
-        for word in (index.keys()):
-            e = list(term_map.values())[ind]
-            file.write(str(e) + ' ' + str(fmap))
-            file.write('\n')
-            ind += 1
-        file.close()
-        '''
-        docs = []  #total docs in which a word appear
-        pos = []   #frequency of docs
-        for word in index.keys():
-            d = list(index[word].keys())
-            docs.append(d)
-
-            i = 0
-            for item in index.values():
-                last = list(index.values())[i]
-                #print(last)
-                last1 = list(last.keys())[-5:]
-                pos.append(last1)
-                i += 1
-            
-            print(pos)
-            sub_keys = sorted(map(int, (pos)))
-            
-            count = 0
-            z = 0
-            temp = []
-            
-            whole_dict = {}
-            for e in index:
-                e1 = list(e)[0]
-                whole_dict[e1] = e[e1]
-            
-            for sub_key in sub_keys:
-                sub_values = whole_dict[str(sub_key)]
-                
-                i = sorted(map(int, sub_values))
-                temp.append(i)
-                count = count + len(i)  #total positions in a file
-                #print(count)
-        #print(docs)
-            print(count)        
+        query = input("\nEnter Word to Search: ")
+        #print(query)
+        
+        query1 = PorterStemmer().stem(query)
+        res = (term_map.get(query1, "Not Found!"))
+        #print(res)
+        
+        file = "temp_term_info.txt"
+        
+        f =  linecache.getline(file, res)
+        print("TermID, offset, pos, docs_count")
+        print((f))

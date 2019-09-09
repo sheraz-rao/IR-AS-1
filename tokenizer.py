@@ -90,6 +90,11 @@ def process_files(path):
     np.savetxt('docids.txt', docs, encoding="utf-8", fmt='%s')
     
     #Forward index containing position of each term in each file
+    #this index table will be used in sorting based inverted index method
+    #this table contains digits stored as strings....
+    #easy to map on corresponding integers
+    #this will help in making the required term-index.txt file in correct format
+    
     with open('pos_of_each_term_in_each_file.txt', mode='w', encoding="utf-8", errors='ignore') as pos_in_file:
         for key in posting:
             pos_in_file.write(str(key[0]) + '\t' + str(key[1]))
