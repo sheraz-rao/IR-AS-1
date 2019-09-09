@@ -159,7 +159,7 @@ if __name__=="__main__":
         res = (term_map.get(query1, "Not Found!"))
         #print(res)
         
-        file = "temp_term_info.txt"
+        file = "term_info.txt"
         
         f =  linecache.getline(file, res)
         print("TermID, offset, pos, docs_count")
