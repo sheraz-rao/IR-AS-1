@@ -89,8 +89,8 @@ def indexer():
                 occurences += len(doc_dict[k])  #doc_dict[k] contains list of positions 
             
             out.write(str(occurences) + ' ')
-            document_occurences = len(fname_Wpos)
-            out.write(str(document_occurences) + ' ')
+            doc_occur = len(fname_Wpos) #count of docs a word occured in
+            out.write(str(doc_occur) + ' ')
             
             #loop for delta encoding....
             curr_doc_id = 0
@@ -131,36 +131,36 @@ def indexer():
     
     first_line = True
     index = 0
-    with open('term_info.txt', 'w', encoding="utf-8") as output_file:
+    with open('term_info.txt', 'w', encoding="utf-8") as out:
         for key in final_index.keys():
-            output_file.write(str(key) + '\t')        
+            out.write(str(key) + '\t')        
             fname_Wpos = final_index[key]
             
             if first_line == True:
                 #offset for first is set to zero.....
-                output_file.write('0' + '\t')
+                out.write('0' + '\t')
                 first_line = False   
             
             else: #will be skipped for first time...
                 if index == 0:
-                    output_file.write(str(address[index]) + '\t')
+                    out.write(str(address[index]) + '\t')
                 
                 else:
                     #address will be calc by adding value at address[index] + previous value
                     address[index] += address[index-1]
-                    output_file.write(str(address[index]) + '\t')
+                    out.write(str(address[index]) + '\t')
                 
                 index += 1           
             
             occurences = 0        
             for doc_dict in fname_Wpos:
-                temp = list(doc_dict)[0]
-                occurences += len(doc_dict[temp])
+                k = list(doc_dict)[0]
+                occurences += len(doc_dict[k])
             
-            output_file.write(str(occurences) + '\t')
-            document_occurences = len(fname_Wpos)
-            output_file.write(str(document_occurences) + '\n')
+            out.write(str(occurences) + '\t')
+            doc_occur = len(fname_Wpos)
+            out.write(str(doc_occur) + '\n')
         
-    output_file.close()
+    out.close()
            
 indexer()
