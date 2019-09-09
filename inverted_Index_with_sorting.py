@@ -31,36 +31,37 @@ def indexer():
     address = []    
     index = 0
     
+    #sorted_keys has sorted list[1,2,3,4,.....]
     for key in sorted_keys:
         sub_arr = term_index[str(key)]
         
-        whole_dict = {}
-        elements=[]
-        inner_arr=[]      
+        helper_dict = {}
+        doc_ids = []   
         
         for e in sub_arr:
             e1 = list(e)[0]
-            whole_dict[e1] = e[e1]
+            helper_dict[e1] = e[e1]
         
         for item in sub_arr:
             temp = list(item)[0]
-            elements.append(temp)    
+            doc_ids.append(temp)    
             
-        sub_keys = sorted(map(int, elements))
-        #print("sub_keys: \n", sub_keys) #tells a list of docs in which the word appear
+        sorted_ids = sorted(map(int, doc_ids))
+        #print("sorted_ids: \n", sorted_ids) #tells a list of docs in which the word appear
         
-        total_doc_count = len(sub_keys) #tells us total docs in which word appear
+        total_doc_count = len(sorted_ids) #tells us total docs in which word appear
         
         count = 0
         z = 0
-        for sub_key in sub_keys:
-            sub_values = whole_dict[str(sub_key)]
+        for sub_key in sorted_ids:
+            pos_of_words = helper_dict[str(sub_key)]
             
-            i = sorted(map(int, sub_values))
+            i = sorted(map(int, pos_of_words))
             count = count + len(i)  #total positions in a file
     
             internal_dict = {}
-            internal_dict[sub_key] = sorted(map(int, sub_values))
+            #store positions against each word
+            internal_dict[sub_key] = sorted(map(int, pos_of_words))
            
             if final_index.__contains__(key) == False:
                 final_index[key] = [internal_dict]
@@ -78,46 +79,48 @@ def indexer():
             out.write(str(key) +' ')
             address.append(len(str(key) + '\t'))
             
-            sub_list = final_index[key]
+            #contains [{fname: [positions of word]}]
+            fname_Wpos = final_index[key]
             
-            #loop for storing corpus_count(total occurences) and doc_count(total docs in which word appear),         
-            corpus_count = 0
-            for doc_dict in sub_list:
-                temp = list(doc_dict)[0]
-                corpus_count += len(doc_dict[temp])
+            #loop for storing corpus_count(occurences) and doc_count(total docs in which word appear),         
+            occurences = 0
+            for doc_dict in fname_Wpos:
+                k = list(doc_dict)[0]  #k contains key which is fname
+                occurences += len(doc_dict[k])  #doc_dict[k] contains list of positions 
             
-            out.write(str(corpus_count) + ' ')
-            document_occurences = len(sub_list)
+            out.write(str(occurences) + ' ')
+            document_occurences = len(fname_Wpos)
             out.write(str(document_occurences) + ' ')
             
-            
             #loop for delta encoding....
-            current_doc_id = 0
-            for doc_dict in value:
-                last_doc_id = current_doc_id
-                temp =  list(doc_dict)[0]           
-                current_doc_id = temp  
+            curr_doc_id = 0
+            for doc_dict1 in fname_Wpos:
+                last_doc_id = curr_doc_id
+                k1 = list(doc_dict1)[0]    #k1 contains fname       
+                curr_doc_id = k1  
                 
-                last_position = 0
+                last_pos = 0
+                #first time use actual doc_id and store data accordingly
+                #next time use '0' for same doc_id
                 first_time = True            
-                for current_position in doc_dict[current_doc_id]:
-                    if first_time == False:
-                        doc_id = 0    
+                for curr_pos in doc_dict1[curr_doc_id]:
+                    if first_time == True:
+                        doc_id = abs(curr_doc_id - last_doc_id)
+                        first_time = False    
                     
                     else:
-                        doc_id = abs(current_doc_id - last_doc_id)
-                        first_time = False
+                        doc_id = 0
 
                     #for offset calc add up values and take length
                     docid_pos = str(doc_id)
                     docid_pos +=','
-                    docid_pos += str(abs(current_position - last_position))
+                    docid_pos += str(abs(curr_pos - last_pos))
                     docid_pos += str('\t')
                     
                     out.write(docid_pos)
                     #address has offsets stored in it...
                     address[index] += len(docid_pos)
-                    last_position = current_position 
+                    last_pos = curr_pos 
                 
             out.write('\n')
             address[index] += len('\n')
@@ -125,13 +128,13 @@ def indexer():
             index += 1
     
     out.close()
-  
+    
     first_line = True
     index = 0
     with open('term_info.txt', 'w', encoding="utf-8") as output_file:
         for key in final_index.keys():
             output_file.write(str(key) + '\t')        
-            sub_list = final_index[key]
+            fname_Wpos = final_index[key]
             
             if first_line == True:
                 #offset for first is set to zero.....
@@ -149,15 +152,15 @@ def indexer():
                 
                 index += 1           
             
-            corpus_count = 0        
-            for doc_dict in sub_list:
+            occurences = 0        
+            for doc_dict in fname_Wpos:
                 temp = list(doc_dict)[0]
-                corpus_count += len(doc_dict[temp])
+                occurences += len(doc_dict[temp])
             
-            output_file.write(str(corpus_count) + '\t')
-            document_occurences = len(sub_list)
+            output_file.write(str(occurences) + '\t')
+            document_occurences = len(fname_Wpos)
             output_file.write(str(document_occurences) + '\n')
         
     output_file.close()
-             
+           
 indexer()
