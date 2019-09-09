@@ -115,6 +115,7 @@ def indexer():
                     docid_pos += str('\t')
                     
                     out.write(docid_pos)
+                    #address has offsets stored in it...
                     address[index] += len(docid_pos)
                     last_position = current_position 
                 
@@ -124,10 +125,7 @@ def indexer():
             index += 1
     
     out.close()
-    
-    print(address)
-        
-    offset = 1
+  
     first_line = True
     index = 0
     with open('term_info.txt', 'w', encoding="utf-8") as output_file:
