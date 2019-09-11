@@ -16,7 +16,7 @@ def indexer():
 
     #collect positions of words saved in the file
     t = get_positions(data)
-    term_index = {}
+    term_index = {} #it will have {word: [{fname: [pos1, pos2, pos3...]},...],...}
     
     for key in t:
         if term_index.__contains__(key[1]) == False:
@@ -24,7 +24,6 @@ def indexer():
         else:
             term_index[key[1]].append({key[0]:t[(key[0],key[1])]})
     
-    #print("\nterm index: \n", term_index ,"\n")
     sorted_keys = sorted(map(int, list(term_index.keys())))
     
     final_index = OrderedDict()
@@ -33,6 +32,7 @@ def indexer():
     
     #sorted_keys has sorted list[1,2,3,4,.....]
     for key in sorted_keys:
+        #it will have [fname: [pos1, pos2, pos3...],...]
         sub_arr = term_index[str(key)]
         
         helper_dict = {}
@@ -41,10 +41,7 @@ def indexer():
         for e in sub_arr:
             e1 = list(e)[0]
             helper_dict[e1] = e[e1]
-        
-        for item in sub_arr:
-            temp = list(item)[0]
-            doc_ids.append(temp)    
+            doc_ids.append(e1)    
             
         sorted_ids = sorted(map(int, doc_ids))
         #print("sorted_ids: \n", sorted_ids) #tells a list of docs in which the word appear
@@ -162,5 +159,5 @@ def indexer():
             out.write(str(doc_occur) + '\n')
         
     out.close()
-           
+         
 indexer()

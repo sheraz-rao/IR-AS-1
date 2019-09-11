@@ -17,17 +17,20 @@ def remove_headers(file_name):
     with codecs.open(file_name, encoding="utf-8", errors = 'ignore') as f: 
         data = f.read().splitlines()
     
-    found_header = True
+    head = True
     i = 0
     for line in data:
         if ('<html' in line.lower() or\
-        '<!doctype html' in line.lower()) \
-        and 'content-type:' not in line.lower():
-            found_header = False
+            '<!doctype html' in line.lower()) \
+            and 'content-type:' not in line.lower():
+            
+            head = False
             file_data = ' '.join(data)
             return file_data
-        if found_header == True:
+        
+        if head == True:
             data[i] = ''
+        
         i += 1
         
     file_data = ' '.join(data)
@@ -102,7 +105,7 @@ def process_files(path):
     return mapping, term_map
 
 #input = [word1, word2, ...]
-#output = {word1: [pos1, pos2], word2: [pos2, pos434], ...}
+#output = {word1: [pos1, pos2], word2: [pos2, pos3], ...}
 def make_word_pos_dict(parameter):
     word_positions = {}
     for index, word in enumerate(parameter):
@@ -128,11 +131,21 @@ def final_indexing(parameter):
     final_index = {}
     
     for fname in parameter.keys():
+        
+        #iterate through every word in the parameter hash
         for word in parameter[fname].keys():
+            #check if that word is present as a key in the final_index. 
+            #If it isn’t, then we add it, setting as its value another hashtable
+            #that maps the document, in this case by the variable fname, to the list of positions of that word.
             if word in final_index.keys():
+                
+                #If it is a key, then check: if the current document is in each 
+                #word’s hashtable; the one that maps filenames to word positions(fname).
+                #If yes, we extend the current positions list with this list of positions
                 if fname in final_index[word].keys():
                    final_index[word][fname].extend(parameter[fname][word][:])
                 
+                #set the positions equal to the positions list for this filename.
                 else:
                    final_index[word][fname] = parameter[fname][word]
             else:
