@@ -17,6 +17,7 @@ There are 3 code files
    
    How to run it? Enter in terminal in this format: 
    python inverted_index.py <directory/path>
+   After files have been processed you will be asked to enter the word to search. Enter the word and program will show you related data to    that word i.e. termID, total docs it appeared in and total positions it occured in.
    
 3) inverted_index_with_sorting.py
     this file uses a txt file containing forward index...I used it to make the required "term_index.txt" format.
